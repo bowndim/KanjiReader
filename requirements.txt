@@ -1,0 +1,9 @@
+openai>=1.25.0
+fugashi[unidic-lite]
+pykakasi
+ebooklib
+jinja2
+aiohttp              # async image download
+requests
+playwright
+pillow
