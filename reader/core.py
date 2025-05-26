@@ -385,7 +385,7 @@ async def make_reader(
     wc_range:tuple[int,int],
     n_pics:int,
     style:str,
-    idea:str|None,
+    idea:str|None=None,
 ):
     # Step I : load story.txt
     story_prompt = env.get_template("story.j2").render(
