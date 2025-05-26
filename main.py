@@ -32,6 +32,6 @@ async def generate(data: dict):
     except Exception as exc:
         traceback.print_exc() 
         raise HTTPException(400, str(exc))
-    # single-file return (PDF); you may zip three files instead
-    return FileResponse(pdf, media_type="application/pdf",
-                        filename=pdf.name)
+    # single-file return (html); you may zip three files instead
+    return FileResponse(html, media_type="text/html; charset=utf-8",
+                        filename=html.name)
