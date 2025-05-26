@@ -2,7 +2,7 @@ import os, re, json, asyncio, io, pathlib, datetime, requests
 from pathlib import Path
 from PIL import Image
 
-import openai, jinja2, fugashi, pykakasi, unidic
+import openai, jinja2, fugashi, pykakasi
 from ebooklib import epub
 from aiohttp import ClientSession
 
@@ -25,7 +25,6 @@ OPENAI_MODEL_IMAGE = "dall-e-3"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 env = jinja2.Environment(loader=jinja2.FileSystemLoader("prompts"))
 KANJI = json.load(open(KANJI_JSON, encoding="utf-8"))
-dic_dir = pathlib.Path(unidic.DICDIR)
 os.environ["MECABRC"] = str(dic_dir / "mecabrc")   # ← key line
 kakasi = pykakasi.kakasi()
 CHAR_THRESHOLD = 500   # tweak as taste
