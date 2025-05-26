@@ -2,11 +2,20 @@ import asyncio, tempfile, traceback
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from reader import make_reader
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(
     title="Kanji Reader API",
     docs_url=None,               # hide Swagger in production
     redoc_url=None
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://kiwibookworld.com"],  # or ["*"] for quick test
+    allow_methods=["POST"],
+    allow_headers=["Content-Type"],
 )
 
 from fastapi.responses import PlainTextResponse
