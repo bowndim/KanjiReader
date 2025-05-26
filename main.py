@@ -1,7 +1,7 @@
 import asyncio, tempfile
 from fastapi import FastAPI, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-import reader
+from fastapi.responses import FileResponse, JSONResponse
+from reader import make_reader
 
 app = FastAPI()
 
@@ -10,7 +10,7 @@ import inspect, pathlib
 
 @app.get("/debug/reader", include_in_schema=False)
 def debug_reader():
-    mod_path = pathlib.Path(reader.__file__).resolve()
+    mod_path = pathlib.Path(sys.modules["reader"].__file__).resolve().parent
     attrs = [a for a in dir(reader) if a.startswith("make")]
     return PlainTextResponse(f"path  : {mod_path}\nattrs : {attrs}\n")
 
@@ -22,7 +22,7 @@ def root():
 @app.post("/generate")
 async def generate(data: dict):
     try:
-        epub, pdf, html = await reader.make_reader(**data)
+        epub, pdf, html = await make_reader(**data)
     except Exception as e:
         raise HTTPException(400, str(e))
     # single-file return (PDF); you may zip three files instead

@@ -2,7 +2,7 @@
 import asyncio, json, threading, tkinter as tk
 from tkinter import ttk, messagebox
 from pathlib import Path
-import reader                      # your make_reader() module
+from . import make_reader
 import webbrowser
 
 KANJI_FILE = Path(__file__).parent.with_name("kanji_by_grade.json")
@@ -174,7 +174,7 @@ class ReaderGUI(tk.Tk):
 
     async def build_reader(self):
         try:
-            epub_path, pdf_path, html_path = await reader.make_reader(
+            epub_path, pdf_path, html_path = await make_reader(
                 grade=int(self.grade_var.get()),
                 kanji=list(self.selected_kanji),
                 min_freq=self.rep_var.get(),

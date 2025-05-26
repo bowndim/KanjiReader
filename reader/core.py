@@ -1,9 +1,3 @@
-# reader_local.py
-# -------------------------------------------------
-# Offline version of the graded-reader builder.
-# Uses local files instead of OpenAI API calls so you can
-# exercise the ruby injection, validation, and EPUB logic.
-
 import os, re, json, asyncio, io, pathlib, datetime, requests
 from pathlib import Path
 from PIL import Image
