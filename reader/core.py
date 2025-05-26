@@ -5,6 +5,7 @@ from PIL import Image
 import openai, jinja2, fugashi, pykakasi
 from ebooklib import epub
 from aiohttp import ClientSession
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import unicodedata as ud
 
@@ -13,17 +14,18 @@ import tempfile, jaconv
 
 import base64
 # ---------- paths ----------
-BASE = Path(__file__).parent.parent
+BASE = Path(__file__).parent
 KANJI_JSON = BASE / "kanji_by_grade.json"
-OUTPUT_FOLDER = BASE / "books"
-DBG_DIR  = BASE / "ai_debug"
+TEMPLATE_DIR = BASE / "prompts" 
+OUTPUT_DIR = BASE.parent / "books"
+DBG_DIR  = BASE.parent / "ai_debug"
 DBG_DIR.mkdir(exist_ok=True)
 
 # ---------- static data ----------
 OPENAI_MODEL_TEXT = "gpt-4o-mini"
 OPENAI_MODEL_IMAGE = "dall-e-3"
 openai.api_key = os.getenv("OPENAI_API_KEY")
-env = jinja2.Environment(loader=jinja2.FileSystemLoader("prompts"))
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIR),autoescape=select_autoescape())
 KANJI = json.load(open(KANJI_JSON, encoding="utf-8"))
 kakasi = pykakasi.kakasi()
 CHAR_THRESHOLD = 500   # tweak as taste
@@ -379,6 +381,7 @@ async def download_image(url, session):
 
 # ---------- main test-driver ----------
 async def make_reader(
+    *,
     grade:int,
     kanji:list[str],
     min_freq:int,
@@ -386,6 +389,7 @@ async def make_reader(
     n_pics:int,
     style:str,
     idea:str|None=None,
+    out_dir=OUTPUT_DIR
 ):
     # Step I : load story.txt
     story_prompt = env.get_template("story.j2").render(
@@ -578,7 +582,7 @@ img{max-width:100%;}div.pagebreak{page-break-after:always;}"""
     book.spine = ["nav"] + spine
     book.add_item(epub.EpubNcx()); book.add_item(epub.EpubNav())
 
-    epub_path = BASE / OUTPUT_FOLDER / filename
+    epub_path = out_dir / filename
     epub.write_epub(epub_path, book)
     print("✅ EPUB written to", epub_path)
     
@@ -586,10 +590,10 @@ img{max-width:100%;}div.pagebreak{page-break-after:always;}"""
     #full_html = build_full_html(html_pieces)
     full_html = build_full_html(pdf_pages)
     html_file = f"{slug}.html"
-    html_path = BASE / OUTPUT_FOLDER / html_file
+    html_path = out_dir / html_file
     with open(html_path, "w", encoding="utf-8") as fp:
         fp.write(full_html)   
-    pdf_path = BASE / OUTPUT_FOLDER / pdf_file      
+    pdf_path = out_dir / pdf_file      
     await html_to_pdf(full_html, pdf_path)
 
     return (epub_path, pdf_path, html_path)
@@ -603,7 +607,7 @@ if __name__ == "__main__":
         kanji=["海","魚","強"],
         min_freq=5,
         wc_range=(2000, 3000),
-        n_pics=1,
+        n_pics=0,
         style="Colored Pencil sketch",
         idea=None
     ))
