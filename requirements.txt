@@ -7,3 +7,4 @@ aiohttp              # async image download
 requests
 playwright
 pillow
+uvicorn
