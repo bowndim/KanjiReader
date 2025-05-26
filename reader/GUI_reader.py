@@ -5,7 +5,7 @@ from pathlib import Path
 import reader                      # your make_reader() module
 import webbrowser
 
-KANJI_FILE = Path(__file__).with_name("kanji_by_grade.json")
+KANJI_FILE = Path(__file__).parent.with_name("kanji_by_grade.json")
 
 # ── core async helper ───────────────────────────────────────────
 def run_async(coro):
@@ -98,7 +98,7 @@ class ReaderGUI(tk.Tk):
 
         # ── Image count ───────────────────────────────────────
         self.img_var = tk.IntVar(value=0)
-        ttk.Label(parent, text="Illustrations (max 5):")\
+        ttk.Label(parent, text="Illustrations (max 3):")\
             .grid(row=5, column=0, sticky="w", pady=pady)
         ttk.Spinbox(parent, from_=0, to=10, width=5,
                     textvariable=self.img_var,

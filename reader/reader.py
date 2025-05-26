@@ -19,12 +19,11 @@ import tempfile, jaconv
 
 import base64
 # ---------- paths ----------
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 KANJI_JSON = BASE / "kanji_by_grade.json"
-STORY_FILE = BASE / "story.txt"
-SPLIT_FILE = BASE / "split1.json"
-IMG_PATTERN = "img{index}.jpg"       # img1.jpg, img2.jpg …
-OUTPUT_FOLDER = "books"
+OUTPUT_FOLDER = BASE / "books"
+DBG_DIR  = BASE / "ai_debug"
+DBG_DIR.mkdir(exist_ok=True)
 
 # ---------- static data ----------
 OPENAI_MODEL_TEXT = "gpt-4o-mini"
@@ -38,10 +37,8 @@ kakasi = pykakasi.kakasi()
 CHAR_THRESHOLD = 500   # tweak as taste
 # romaji vowel → hiragana we want to append
 VOWEL2HIRA = {"a": "あ", "i": "い", "u": "う", "e": "い", "o": "う"}
-DEBUG_AI = True                    # switch to False in production
-DBG_DIR  = pathlib.Path("ai_debug")
-DBG_DIR.mkdir(exist_ok=True)
-MAX_PICS = 5
+DEBUG_AI = False                    # switch to False in production
+MAX_PICS = 3
 MAX_RETRY_SPLIT = 2 
 
 HTML_TMPL = """<!DOCTYPE html>
@@ -404,7 +401,6 @@ async def make_reader(
         temperature=0.7
     )
     data = json.loads(resp_story.choices[0].message.content)
-    #data = json.loads(STORY_FILE.read_text(encoding="utf-8"))
     title       = data["title"].strip()
     story_raw   = data["story"].split("###END###")[0].strip()
     story_clean = sanitize(story_raw, grade)
