@@ -111,9 +111,14 @@ def make_tagger(dic: str = "lite") -> fugashi.GenericTagger:
     """
     if dic == "lite":
         import unidic_lite
-        dicdir = pathlib.Path(unidic_lite.DICDIR)      # .../unidic_lite/dicdir
+        dicdir = pathlib.Path(unidic_lite.DICDIR)
+        rcfile = dicdir / "mecabrc"          # file exists in the wheel
+        os.environ["MECABRC"] = str(rcfile)  # ← add this line
+        # either give both -r and -d, or just -d (MeCab reads env var)
+        return fugashi.GenericTagger(f'-r "{rcfile}" -d "{dicdir}"')        
+        #dicdir = pathlib.Path(unidic_lite.DICDIR)      # .../unidic_lite/dicdir
         # lite wheel already bundles a mini mecabrc → GenericTagger() is enough
-        return fugashi.GenericTagger(f'-d "{dicdir}"')
+        #return fugashi.GenericTagger(f'-d "{dicdir}"')
 
     elif dic == "full":
         import unidic
@@ -598,7 +603,7 @@ if __name__ == "__main__":
         kanji=["海","魚","強"],
         min_freq=5,
         wc_range=(2000, 3000),
-        n_pics=3,
+        n_pics=1,
         style="Colored Pencil sketch",
         idea=None
     ))
