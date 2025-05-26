@@ -1,4 +1,4 @@
-import asyncio, tempfile
+import asyncio, tempfile, traceback
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from reader import make_reader
