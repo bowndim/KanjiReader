@@ -7,4 +7,5 @@ aiohttp              # async image download
 requests
 playwright
 pillow
-uvicorn
+fastapi>=0.110
+uvicorn[standard]>=0.30
