@@ -3,7 +3,11 @@ from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from reader import make_reader
 
-app = FastAPI()
+app = FastAPI(
+    title="Kanji Reader API",
+    docs_url=None,               # hide Swagger in production
+    redoc_url=None
+)
 
 from fastapi.responses import PlainTextResponse
 import inspect, pathlib
@@ -23,8 +27,9 @@ def root():
 async def generate(data: dict):
     try:
         epub, pdf, html = await make_reader(**data)
-    except Exception as e:
-        raise HTTPException(400, str(e))
+    except Exception as exc:
+        traceback.print_exc() 
+        raise HTTPException(400, str(exc))
     # single-file return (PDF); you may zip three files instead
     return FileResponse(pdf, media_type="application/pdf",
                         filename=pdf.name)
