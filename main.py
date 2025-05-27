@@ -1,8 +1,9 @@
-import asyncio, tempfile, traceback
+import asyncio, tempfile, traceback, shutil
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from reader import make_reader
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import BackgroundTasks
 
 
 app = FastAPI(
@@ -33,14 +34,16 @@ def root():
     return JSONResponse({"status": "ok"})
 
 @app.post("/generate")
-async def generate(data: dict):
-    tmp = tempfile.TemporaryDirectory() # auto-deleted on GC
-    work = pathlib.Path(tmp.name)
+async def generate(data: dict, bk: BackgroundTasks):
+    #tmp = tempfile.TemporaryDirectory() # auto-deleted on GC
+    tmpdir = tempfile.mkdtemp()
+    work = pathlib.Path(tmpdir.name)
     try:
         epub, html = await make_reader(out_dir=work, **data)
     except Exception as exc:
         traceback.print_exc() 
         raise HTTPException(400, str(exc))
-    # single-file return (html); you may zip three files instead
+    bk.add_task(shutil.rmtree, tmpdir, ignore_errors=True)
+    # single-file return (html); you may zip three files instead    
     return FileResponse(html, media_type="text/html; charset=utf-8",
                         filename=html.name)
