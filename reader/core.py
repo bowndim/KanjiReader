@@ -594,7 +594,8 @@ img{max-width:100%;}div.pagebreak{page-break-after:always;}"""
     with open(html_path, "w", encoding="utf-8") as fp:
         fp.write(full_html)   
     pdf_path = out_dir / pdf_file      
-    await html_to_pdf(full_html, pdf_path)
+    #this isnt neccessary
+    #await html_to_pdf(full_html, pdf_path)
 
     return (epub_path, pdf_path, html_path)
 
