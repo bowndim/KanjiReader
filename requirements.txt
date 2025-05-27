@@ -5,7 +5,6 @@ ebooklib
 jinja2
 aiohttp              # async image download
 requests
-playwright
 pillow
 fastapi>=0.110
 uvicorn[standard]>=0.30

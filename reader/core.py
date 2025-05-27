@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import unicodedata as ud
 
-from playwright.async_api import async_playwright
+#from playwright.async_api import async_playwright
 import tempfile, jaconv
 
 import base64
@@ -196,16 +196,16 @@ def build_full_html(html_pieces:list[str])->str:
         joined += f"<div>{block}</div><div class='pagebreak'></div>"
     return HTML_TMPL.format(content=joined)
 
-async def html_to_pdf(html:str, outfile:str, page_size:str="A4"):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch()
-        page = await browser.new_page()
-        await page.set_content(html, wait_until="networkidle")
-        await page.pdf(path=outfile,
-                       format=page_size,
-                       margin={"top":"0","bottom":"0","left":"0","right":"0"},
-                       print_background=True)
-        await browser.close()
+#async def html_to_pdf(html:str, outfile:str, page_size:str="A4"):
+#    async with async_playwright() as p:
+#        browser = await p.chromium.launch()
+#        page = await browser.new_page()
+#        await page.set_content(html, wait_until="networkidle")
+#        await page.pdf(path=outfile,
+#                       format=page_size,
+#                       margin={"top":"0","bottom":"0","left":"0","right":"0"},
+#                       print_background=True)
+#        await browser.close()
         
 def is_kanji(c):
     return "CJK UNIFIED" in ud.name(c, "")
@@ -593,11 +593,11 @@ img{max-width:100%;}div.pagebreak{page-break-after:always;}"""
     html_path = out_dir / html_file
     with open(html_path, "w", encoding="utf-8") as fp:
         fp.write(full_html)   
-    pdf_path = out_dir / pdf_file      
+    #pdf_path = out_dir / pdf_file      
     #this isnt neccessary
     #await html_to_pdf(full_html, pdf_path)
 
-    return (epub_path, pdf_path, html_path)
+    return (epub_path, html_path)
 
 
 # ---------- quick manual test ----------

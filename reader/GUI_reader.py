@@ -174,7 +174,7 @@ class ReaderGUI(tk.Tk):
 
     async def build_reader(self):
         try:
-            epub_path, pdf_path, html_path = await make_reader(
+            epub_path, html_path = await make_reader(
                 grade=int(self.grade_var.get()),
                 kanji=list(self.selected_kanji),
                 min_freq=self.rep_var.get(),

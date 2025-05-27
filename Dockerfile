@@ -12,8 +12,7 @@ COPY . .
 COPY reader ./reader
 COPY requirements.txt . 
 
-RUN pip install --no-cache-dir -r requirements.txt \
-    && python -m playwright install --with-deps chromium
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["sh","-c","python -m uvicorn main:app --host 0.0.0.0 --port $PORT"]
 

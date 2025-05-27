@@ -37,7 +37,7 @@ async def generate(data: dict):
     tmp = tempfile.TemporaryDirectory() # auto-deleted on GC
     work = pathlib.Path(tmp.name)
     try:
-        epub, pdf, html = await make_reader(out_dir=work, **data)
+        epub, html = await make_reader(out_dir=work, **data)
     except Exception as exc:
         traceback.print_exc() 
         raise HTTPException(400, str(exc))
