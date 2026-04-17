@@ -2,7 +2,9 @@ import os, re, json, asyncio, io, pathlib, datetime, requests
 from pathlib import Path
 from PIL import Image
 
-import openai, jinja2, fugashi, pykakasi
+import openai
+import anthropic
+import jinja2, fugashi, pykakasi
 from ebooklib import epub
 from aiohttp import ClientSession
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -24,14 +26,18 @@ DBG_DIR.mkdir(exist_ok=True)
 # ---------- static data ----------
 OPENAI_MODEL_TEXT = "gpt-4o-mini"
 OPENAI_MODEL_IMAGE = "dall-e-3"
+CLAUDE_MODEL_TEXT = "claude-haiku-4-5-20251001"  # see recommendations below
+CLAUDE_STORY_MODEL_TEXT = "claude-sonnet-4-6"
 openai.api_key = os.getenv("OPENAI_API_KEY")
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
 env = Environment(loader=FileSystemLoader(TEMPLATE_DIR),autoescape=select_autoescape())
 KANJI = json.load(open(KANJI_JSON, encoding="utf-8"))
 kakasi = pykakasi.kakasi()
 CHAR_THRESHOLD = 500   # tweak as taste
 # romaji vowel → hiragana we want to append
 VOWEL2HIRA = {"a": "あ", "i": "い", "u": "う", "e": "い", "o": "う"}
-DEBUG_AI = False                    # switch to False in production
+DEBUG_AI = True                    # switch to False in production
 MAX_PICS = 3
 MAX_RETRY_SPLIT = 2 
 
@@ -300,7 +306,8 @@ def dump_ai(kind: str, slug: str, resp):
     fname = DBG_DIR / f"{slug}_{kind}_{ts}.json"
 
     # serialise openai response → JSON
-    if hasattr(resp, "model_dump_json"):       # v1 client
+    #if hasattr(resp, "model_dump_json"):       # v1 client
+    if hasattr(resp, "model_dump"): 
         raw = resp.model_dump()
     else:                                      # fallback for older
         raw = resp
@@ -396,12 +403,19 @@ async def make_reader(
         grade=grade, kanji_list=kanji, min_freq=min_freq,
         wc_min=wc_range[0], wc_max=wc_range[1], idea=idea
     )
-    resp_story = openai.chat.completions.create(
-        model=OPENAI_MODEL_TEXT,
-        messages=[{"role":"user","content":story_prompt}],
+    #resp_story = openai.chat.completions.create(
+    #    model=OPENAI_MODEL_TEXT,
+    #    messages=[{"role":"user","content":story_prompt}],
+    #    temperature=0.7
+    #)
+    #data = json.loads(resp_story.choices[0].message.content)
+    resp_story = client.messages.create(
+        model=CLAUDE_STORY_MODEL_TEXT,
+        max_tokens=4096,
+        messages=[{"role": "user", "content": story_prompt}],
         temperature=0.7
     )
-    data = json.loads(resp_story.choices[0].message.content)
+    data = json.loads(resp_story.content[0].text)
     title       = data["title"].strip()
     story_raw   = data["story"].split("###END###")[0].strip()
     story_clean = sanitize(story_raw, grade)
@@ -422,14 +436,21 @@ async def make_reader(
         dump_prompt("split", slug, split_prompt)     
       
         for attempt in range(MAX_RETRY_SPLIT + 1):    
-            resp_split = openai.chat.completions.create(
-                model=OPENAI_MODEL_TEXT,
-                messages=[{"role":"user","content":split_prompt}],
+            #resp_split = openai.chat.completions.create(
+            #    model=OPENAI_MODEL_TEXT,
+            #    messages=[{"role":"user","content":split_prompt}],
+            #    temperature=0.5
+            #) 
+            resp_split = client.messages.create(
+                model=CLAUDE_MODEL_TEXT,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": story_prompt}],
                 temperature=0.5
-            ) 
+            )            
             dump_ai("split", slug, resp_split)    
             #pieces_obj = json.load(open(SPLIT_FILE, encoding="utf-8"))
-            pieces_obj = json.loads(resp_split.choices[0].message.content )
+            #pieces_obj = json.loads(resp_split.choices[0].message.content )
+            pieces_obj = json.loads(resp_story.content[0].text)
             pieces = pieces_obj["pieces"]               # [{text:, prompt:}, …]
             expected = n_pics
                 # ---------- validation ----------

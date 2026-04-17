@@ -5,7 +5,7 @@ from pathlib import Path
 from . import make_reader
 import webbrowser
 
-KANJI_FILE = Path(__file__).parent.with_name("kanji_by_grade.json")
+KANJI_FILE = Path(__file__).parent / "kanji_by_grade.json"
 
 # ── core async helper ───────────────────────────────────────────
 def run_async(coro):
