@@ -415,7 +415,11 @@ async def make_reader(
         messages=[{"role": "user", "content": story_prompt}],
         temperature=0.7
     )
-    data = json.loads(resp_story.content[0].text)
+    raw_story = resp_story.content[0].text.strip()
+    if raw_story.startswith("```"):
+        raw_story = re.sub(r"^```[^\n]*\n?", "", raw_story)
+        raw_story = re.sub(r"\n?```$", "", raw_story.strip())
+    data = json.loads(raw_story)
     title       = data["title"].strip()
     story_raw   = data["story"].split("###END###")[0].strip()
     story_clean = sanitize(story_raw, grade)
@@ -444,13 +448,17 @@ async def make_reader(
             resp_split = client.messages.create(
                 model=CLAUDE_MODEL_TEXT,
                 max_tokens=4096,
-                messages=[{"role": "user", "content": story_prompt}],
+                messages=[{"role": "user", "content": split_prompt}],
                 temperature=0.5
             )            
             dump_ai("split", slug, resp_split)    
             #pieces_obj = json.load(open(SPLIT_FILE, encoding="utf-8"))
             #pieces_obj = json.loads(resp_split.choices[0].message.content )
-            pieces_obj = json.loads(resp_story.content[0].text)
+            raw_split = resp_split.content[0].text.strip()
+            if raw_split.startswith("```"):
+                raw_split = re.sub(r"^```[^\n]*\n?", "", raw_split)
+                raw_split = re.sub(r"\n?```$", "", raw_split.strip())
+            pieces_obj = json.loads(raw_split)
             pieces = pieces_obj["pieces"]               # [{text:, prompt:}, …]
             expected = n_pics
                 # ---------- validation ----------
