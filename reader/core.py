@@ -25,7 +25,7 @@ DBG_DIR.mkdir(exist_ok=True)
 
 # ---------- static data ----------
 OPENAI_MODEL_TEXT = "gpt-4o-mini"
-OPENAI_MODEL_IMAGE = "gpt-image-2"
+OPENAI_MODEL_IMAGE = "dall-e-3"
 CLAUDE_MODEL_TEXT = "claude-haiku-4-5-20251001"  # see recommendations below
 CLAUDE_STORY_MODEL_TEXT = "claude-sonnet-4-6"
 openai.api_key = os.getenv("OPENAI_API_KEY")
